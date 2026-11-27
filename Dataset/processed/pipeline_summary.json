@@ -1,0 +1,23 @@
+{
+  "raw_rows": 1338,
+  "exact_duplicates_removed": 1,
+  "clean_rows": 1337,
+  "kpis": {
+    "records": 1337,
+    "total_charges": 17754185.427659,
+    "average_charge": 13279.121486655948,
+    "median_charge": 9386.1613,
+    "highest_charge": 63770.42801,
+    "lowest_charge": 1121.8739,
+    "std_charge": 12110.359656344175,
+    "high_cost_threshold": 34832.7416,
+    "high_cost_records": 134,
+    "high_cost_share_of_total": 0.31985381476376623
+  },
+  "iqr_upper_fence": 34524.777625,
+  "iqr_outliers": 139,
+  "peer_anomalies": 105,
+  "peer_anomalies_above": 105,
+  "peer_anomalies_below": 0,
+  "model_r2_log_charges": 0.7881951890896698
+}

@@ -1,0 +1,5 @@
+region,records,total_charges,mean_charge,median_charge,max_charge,pct_of_records,pct_of_total_charges,high_cost_records,high_cost_rate_pct
+northeast,324,4343668.58,13406.38,10057.65,58571.07,24.23,24.47,27,8.33
+northwest,324,4034072.43,12450.84,8976.98,60021.4,24.23,22.72,20,6.17
+southeast,364,5363689.76,14735.41,9294.13,63770.43,27.23,30.21,55,15.11
+southwest,325,4012754.65,12346.94,8798.59,52590.83,24.31,22.6,32,9.85

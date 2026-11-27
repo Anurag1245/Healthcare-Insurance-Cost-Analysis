@@ -1,0 +1,9 @@
+region,smoker,records,mean_charge,median_charge,total_charges,pct_of_total_charges
+northeast,no,257,9165.53,8342.91,2355541.64,13.27
+northeast,yes,67,29673.54,28101.33,1988126.94,11.2
+northwest,no,266,8582.47,7259.23,2282936.25,12.86
+northwest,yes,58,30192.0,27489.0,1751136.18,9.86
+southeast,no,273,8032.22,6652.53,2192795.05,12.35
+southeast,yes,91,34845.0,37484.45,3170894.71,17.86
+southwest,no,267,8019.28,7348.14,2141148.96,12.06
+southwest,yes,58,32269.06,35165.26,1871605.68,10.54

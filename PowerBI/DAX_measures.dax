@@ -1,0 +1,174 @@
+/* =====================================================================================
+   DAX MEASURES - Healthcare Insurance Claims Dashboard
+   Source table name in the model: claims   (Dataset/processed/claims_clean.csv)
+   Create a dedicated table "_Measures" (Home > Enter Data > blank) and add every measure there.
+
+   DATA SCOPE: the dataset has no claim date, provider/insurer, patient ID, diagnosis or admission
+   type. Measures for those concepts therefore do NOT exist here. Section 9 holds commented templates
+   to enable if such columns are added later.
+   ===================================================================================== */
+
+
+/* ------------------------------ 1. CORE KPIs ------------------------------------- */
+
+Total Records =
+COUNTROWS ( claims )
+
+Total Charges =
+SUM ( claims[charges] )
+
+Average Charge =
+DIVIDE ( [Total Charges], [Total Records] )
+
+Median Charge =
+MEDIAN ( claims[charges] )
+
+Highest Charge =
+MAX ( claims[charges] )
+
+Lowest Charge =
+MIN ( claims[charges] )
+
+
+/* ------------------------------ 2. HIGH-COST CLAIMS ------------------------------- */
+-- High-cost = charges above the 90th percentile of the WHOLE dataset (ignores slicers so the
+-- definition stays constant). Matches Python: charges.quantile(0.90) = 34,832.74
+
+High-Cost Threshold (P90) =
+PERCENTILEX.INC ( ALL ( claims ), claims[charges], 0.9 )
+
+High-Cost Records =
+VAR _threshold = [High-Cost Threshold (P90)]
+RETURN
+    CALCULATE ( COUNTROWS ( claims ), claims[charges] > _threshold )
+
+High-Cost Charges =
+VAR _threshold = [High-Cost Threshold (P90)]
+RETURN
+    CALCULATE ( SUM ( claims[charges] ), claims[charges] > _threshold )
+
+High-Cost Rate % =
+DIVIDE ( [High-Cost Records], [Total Records] )
+
+High-Cost Share of Charges % =
+DIVIDE ( [High-Cost Charges], [Total Charges] )
+
+
+/* ------------------------------ 3. PERCENT CONTRIBUTION --------------------------- */
+-- ALLSELECTED(claims) removes the visual's category filter but keeps page/report slicers,
+-- so the percentages always add to 100 % within the current slicer selection.
+
+% of Total Charges =
+DIVIDE ( [Total Charges], CALCULATE ( [Total Charges], ALLSELECTED ( claims ) ) )
+
+% of Total Records =
+DIVIDE ( [Total Records], CALCULATE ( [Total Records], ALLSELECTED ( claims ) ) )
+
+Cost Share minus Record Share (pp) =
+( [% of Total Charges] - [% of Total Records] ) * 100
+-- Positive = the segment costs more than its headcount share suggests.
+
+
+/* ------------------------------ 4. COMPARATIVE COST ------------------------------- */
+
+Average Charge vs Overall =
+[Average Charge] - CALCULATE ( [Average Charge], ALLSELECTED ( claims ) )
+
+Average Charge Index =
+DIVIDE ( [Average Charge], CALCULATE ( [Average Charge], ALLSELECTED ( claims ) ) )
+-- 1.00 = average; 1.50 = 50 % above average.
+
+Smoker Cost Multiple =
+DIVIDE (
+    CALCULATE ( [Average Charge], claims[smoker] = "yes" ),
+    CALCULATE ( [Average Charge], claims[smoker] = "no" )
+)
+
+Region Average Charge =
+-- Dataset's only organisational/geographic grouping. NOT a provider measure.
+[Average Charge]
+
+Region Rank (by Average Charge) =
+RANKX ( ALLSELECTED ( claims[region] ), [Average Charge], , DESC, DENSE )
+
+
+/* ------------------------------ 5. ANOMALY / OUTLIER ------------------------------ */
+-- Flags come from Python (Python/anomaly.py). They mean "unusual for review", NOT fraud.
+
+IQR Outlier Records =
+CALCULATE ( COUNTROWS ( claims ), claims[is_iqr_outlier] = TRUE () )
+
+Peer Anomaly Records =
+CALCULATE ( COUNTROWS ( claims ), claims[is_peer_anomaly] = TRUE () )
+
+Peer Anomaly Rate % =
+DIVIDE ( [Peer Anomaly Records], [Total Records] )
+
+Peer Anomaly Charges =
+CALCULATE ( SUM ( claims[charges] ), claims[is_peer_anomaly] = TRUE () )
+
+Peer Anomaly Share of Charges % =
+DIVIDE ( [Peer Anomaly Charges], [Total Charges] )
+
+Average Multiple of Peer Median =
+AVERAGEX (
+    FILTER ( claims, claims[is_peer_anomaly] = TRUE () ),
+    claims[charge_vs_peer_median]
+)
+
+
+/* ------------------------------ 6. SEGMENT FOCUS ---------------------------------- */
+
+Smoker + Obese Records =
+CALCULATE ( COUNTROWS ( claims ), claims[smoker_bmi_segment] = "Smoker / Obese" )
+
+Smoker + Obese Share of Charges % =
+DIVIDE (
+    CALCULATE ( SUM ( claims[charges] ), claims[smoker_bmi_segment] = "Smoker / Obese" ),
+    CALCULATE ( [Total Charges], ALLSELECTED ( claims ) )
+)
+
+Obese Share of Charges % =
+DIVIDE (
+    CALCULATE ( SUM ( claims[charges] ), claims[bmi_category] = "Obese" ),
+    CALCULATE ( [Total Charges], ALLSELECTED ( claims ) )
+)
+
+
+/* ------------------------------ 7. DISPLAY HELPERS -------------------------------- */
+
+Executive Insight =
+-- Dynamic subtitle for the Executive Overview page.
+"Smokers are " & FORMAT ( DIVIDE ( CALCULATE ( [Total Records], claims[smoker] = "yes" ), [Total Records] ), "0%" )
+    & " of records but "
+    & FORMAT ( DIVIDE ( CALCULATE ( [Total Charges], claims[smoker] = "yes" ), [Total Charges] ), "0%" )
+    & " of total charges."
+
+Data Scope Note =
+"Source: insurance.csv. No date, provider or patient ID available; each row is one beneficiary record."
+
+
+/* ------------------------------ 8. NOT AVAILABLE IN THIS DATASET ------------------- */
+-- Unique Patients      : no patient identifier. Do not use DISTINCTCOUNT(record_id) - it equals the row count.
+-- Monthly Claim Growth : no claim/service date.
+-- Provider-wise Average Cost : no provider/insurer column.
+
+
+/* ------------------------------ 9. TEMPLATES (ONLY IF COLUMNS ARE ADDED LATER) ---------
+   Uncomment after adding claim_date (Date), provider (Text), patient_id (Text) to the table
+   and marking a proper Date table.
+
+Unique Patients =
+DISTINCTCOUNT ( claims[patient_id] )
+
+Charges Previous Month =
+CALCULATE ( [Total Charges], DATEADD ( 'Date'[Date], -1, MONTH ) )
+
+Monthly Claim Growth % =
+VAR _prev = [Charges Previous Month]
+RETURN
+    IF ( NOT ISBLANK ( _prev ), DIVIDE ( [Total Charges] - _prev, _prev ) )
+
+Provider Average Charge =
+AVERAGEX ( VALUES ( claims[provider] ), [Average Charge] )
+   ----------------------------------------------------------------------------------- */

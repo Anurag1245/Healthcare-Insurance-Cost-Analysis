@@ -1,0 +1,5 @@
+smoker_bmi_segment,records,total_charges,mean_charge,median_charge,max_charge,pct_of_records,pct_of_total_charges,high_cost_records,high_cost_rate_pct
+Non-smoker / Non-obese,502,4004468.82,7977.03,6761.62,35160.13,37.55,22.56,1,0.2
+Non-smoker / Obese,561,4967953.09,8855.53,8083.92,36910.61,41.96,27.98,2,0.36
+Smoker / Non-obese,129,2755855.0,21363.22,20167.34,38245.59,9.65,15.52,4,3.1
+Smoker / Obese,145,6025908.53,41557.99,40904.2,63770.43,10.85,33.94,127,87.59

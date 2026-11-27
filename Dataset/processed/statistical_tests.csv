@@ -1,0 +1,7 @@
+comparison,test,p_value,effect_size,effect_size_type,significant_at_5pct
+Charges: smokers vs non-smokers,Mann-Whitney U,5.74701188239214e-130,0.9491660429441533,rank-biserial |r|,True
+Charges: male vs female,Mann-Whitney U,0.6944793894954917,0.01241132371041731,rank-biserial |r|,False
+Charges across regions,Kruskal-Wallis H,0.20161983372303882,0.003459960018312541,epsilon-squared,False
+Charges across BMI categories,Kruskal-Wallis H,0.0006909023796032061,0.012760377019085735,epsilon-squared,True
+Charges across age groups,Kruskal-Wallis H,2.8653174514937874e-76,0.2681699227770727,epsilon-squared,True
+Charges across number of children,Kruskal-Wallis H,2.1957270957731766e-05,0.021796907886958438,epsilon-squared,True
